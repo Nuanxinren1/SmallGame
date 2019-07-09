@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>打砖块游戏</title>
+	<style type="text/css">
+		*{
+			margin: 0;
+			padding: 0;
+		}
+	a{
+		text-decoration: none;
+	}
+	ul li{
+		list-style: none;
+	}
+	body{
+		font-size: 14px;
+		font-family: "微软雅黑";
+	}
+	/*小球div的样式*/
+	#ball{
+		width: 15px;
+		height: 15px;
+		background: #000;
+		border-radius: 50%;
+		position: absolute;
+		top: 0;left: 0;
+		box-shadow: 0 0 9px 9px red;
+	}
+	/*挡板的样式*/
+	#ward{
+		width: 120px;
+		height: 30px;
+		z-index: 999;
+		background-color: #336688;
+		border-radius: 10px; 
+        box-shadow: 0 0 4px #333333; 
+        position: absolute; 
+        left: 0; 
+        }
+ 		/*积分盒子的样式*/
+        #score {
+         width: 100px;
+         height: 100px;
+         font-size: 40px;
+         position: absolute;
+         right: 40px; 
+         top: 40px; 
+         color: #ff2541; 
+         }
+ 		/*砖块区域*/
+        #wrap { 
+        	width: 90%;
+        	height: 500px;
+        	position: relative; 
+        	top: 100px;
+        	left: 0;
+        	right: 0;
+        	margin: auto; 
+        	}
+ 		/*砖块的样式*/
+        #wrap div { 
+        	width: 45px; 
+        	height: 15px; 
+        	border: 1px solid #ff645b; 
+        	position: absolute; 
+        	background: rgb(255, 99, 89); 
+        	box-shadow: 0 0 9px 1px rgb(255, 187, 136) inset; 
+        	top: 0; 
+        	left: 0; 
+        	transform-origin: top center; 
+        }
+ 
+        #gameover { 
+        	position: absolute; 
+        	left: 0; 
+        	right: 0; 
+        	top: 0; 
+        	bottom: 0; 
+        	margin: auto; 
+        	width: 300px; 
+        	height: 200px; 
+        	box-shadow: 0 0 4px #222222; 
+        	background-color: #e1e1e1; 
+        	display: none;
+        }
+ 
+        #gameover p { 
+        	width: 100%; 
+        	height: 40px; 
+        	text-align: center; 
+        	font-size: 36px; 
+        	color: #336688; 
+        	margin-top: 50px; 
+        }
+ 
+        #gameover span { 
+        	width: 60%; 
+        	height: 40px; 
+        	display: block; 
+        	margin: 38px auto 0; 
+        	text-align: center; 
+        	font-size: 20px; 
+        	background: #336688; 
+        	color: #ffffff; 
+        	border-radius: 10px; 
+	       	line-height: 40px;    
+	}
+
+	</style>
+</head>
+<body>
+	<!-- 砖块区域 用来存放所有创建出来的砖块-->
+	<div id="wrap"></div>
+	<!-- 小球盒子 -->
+	<div id="ball"></div>
+	<!-- 挡板盒子 -->
+	<div id="ward"></div>
+	<!-- 积分盒子 -->
+	<div id="score">0分</div>
+	<!-- 游戏结束盒子 -->
+	<div id="gameover">
+	<p>总分:</p>
+    <span>确定</span>
+	</div>
+</body>
+<script type="text/javascript">
+	//获取dom元素
+	var wrap = document.getElementById("wrap");
+	var ball = document.getElementsByTagName("div")[1];
+	var ward = document.querySelector("#ward");
+	var score = document.querySelector("#score");
+	var gameover = document.querySelector("#gameover");
+	//创建一个对象
+	var Play = function(wrap,ball,ward,score,gameover){
+		this.wrap = wrap;
+		this.ball = ball;
+		this.ward = ward;
+		this.score = score;
+		this.gameover = gameover;
+		//给小球绑定定位值
+		this.x = this.ball.offsetLeft;
+		this.y = this.ball.offsetTop;
+		//绑定一下初始化速度和分数
+		this.scores = 0;
+		//小球的移动速度
+		this.speed = 10;
+		//让构造函数的this调用方法
+		this.inite();
+	}
+	Play.prototype.inite = function(){
+		//1.创建砖块
+		this.createBrick();
+		//2.创建小球
+		this.createBall();
+		//3.初始化挡板
+		this.createWard();
+	}
+	//1.创建砖块
+	Play.prototype.createBrick = function(){
+		//共有8行12列
+		for (var i = 0; i < 8; i++) {
+			for (var j = 0; j < 12; j++) {
+				var brick = document.createElement("div");
+				this.wrap.appendChild(brick);
+				var left = 2*brick.offsetWidth;
+				brick.style.left = j*left+"px";
+				var top = 2*brick.offsetHeight;
+				brick.style.top = i*top+"px";
+			}
+		}
+	}
+	//2.创建小球
+	Play.prototype.createBall = function(){
+		this.x = document.documentElement.offsetWidth/2 - this.ball.offsetWidth/2;
+		this.y = document.documentElement.offsetHeight - 30;
+		ball.style.left = this.x+"px";
+		ball.style.top = this.y + "px";
+	}
+	//3.创建挡板
+	Play.prototype.createWard = function(){
+		var war = document.documentElement.offsetWidth/2 - this.ward.offsetWidth/2;
+		ward.style.left = war+"px";
+		var that = this;
+				//第一种方法
+		// document.onmousemove = function(e){
+		// 	var pageX = e.pageX || e.clientX + document.documentElement.scrollLeft;
+		// 	var wardx = pageX - that.ward.offsetWidth;
+		// 	if (wardx<=0) {
+		// 		wardx = 0;
+		// 	}
+		// 	if (wardx >= document.documentElement.offsetWidth - that.ward.offsetWidth) {
+		// 		wardx=document.documentElement.offsetWidth - that.ward.offsetWidth;
+		// 	}
+		// 	ward.style.left = wardx + "px";
+		// }
+			//第二种方法
+		window.addEventListener("mousemove",wardMove.bind(this));//this指向实例化对象
+	}
+	//下面的函数里this指向不是指向之前的实例化对象,所以提前把this 赋值给that
+	var that = this;
+	function wardMove(e){
+		var pageX = e.pageX || e.clientX + document.documentElement.scrollLeft;
+		if (pageX <= 0) {
+			pageX = 0;
+		}
+		else if(pageX >= document.documentElement.offsetWidth - that.ward.offsetWidth){
+				pageX = document.documentElement.offsetWidth - that.ward.offsetWidth;
+		}
+		ward.style.left = pageX +"px";
+	}
+
+	var p = new Play(wrap, ball, ward, score, gameover);
+</script>
+</html>

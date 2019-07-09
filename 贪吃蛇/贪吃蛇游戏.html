@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>贪吃蛇游戏</title>
+</head>
+<body>
+	
+</body>
+<script type="text/javascript">
+		//游戏区域(地图)、食物和蛇
+		//分列式结构思想
+		//1.封装地图对象 先声明构造函数
+	var Map = function(){
+		//1.1 获取并绑定创建地图对象必须的dom元素和属性
+		this.width = 800;
+		this.height = 400;
+		this.color = "#ccc";
+		this.position = "absolute";
+		//1.2 调用方法实现地图对象的创建
+		this.show();
+	}
+	Map.prototype.show = function(){
+		//动态创建地图元素
+		var map = document.createElement("div");
+		//this指向实例化的对象
+		map.style.width = this.width + "px";
+		map.style.height = this.height + 'px';
+		map.style.cursor = "pointer";
+		map.style.position = this.position;
+		map.style.left = 275 + "px";
+		map.style.top = "100px";
+		map.style.backgroundColor = this.color;
+		//将map追加到页面中去
+		document.getElementsByTagName("body")[0].appendChild(map);
+	}
+var map = new Map();
+		//2.封装食物对象
+	var Food = function(){
+		//2.1 设置食物的宽高
+		this.width = 20;
+		this.height = 20;
+		this.position = "absolute";
+		this.color = "green";
+		//设置食物盒子的定位的属性
+		this.x = 0;
+		this.y = 0;	
+		//创建食物属性
+		this.food = null;
+		//调用方法显示食物
+		this.show();
+	}
+	//给食物对象原型绑定show方法	
+	Food.prototype.show = function(){
+		//分两种情况
+		//1.原本没有食物,我们就创建并追加
+		if (this.food == null) {
+			//原本没有食物
+			this.food = document.createElement("div");
+			this.food.style.width = this.width + "px";
+			this.food.style.height = this.height + "px";
+			this.food.style.position = this.position;
+			//设置食物的定位值
+			this.x = Math.floor(Math.random()*40)*20;
+			this.y = Math.floor(Math.random()*20)*20;
+			//给食物做定位
+			this.food.style.left = this.x + "px";
+			this.food.style.top = this.y + "px";
+			this.food.style.backgroundColor = this.color;
+			//把食物追加到地图中
+			document.body.children[1].appendChild(this.food);
+		}
+		//2.原本有食物,我们就直接给食物对象重新定位
+		else {
+			//计算定位值
+			this.x = Math.floor(Math.random()*40)*20;
+			this.y = Math.floor(Math.random()*20)*20;
+			this.food.style.left = this.x+"px";
+			this.food.style.top = this.y+"px";
+
+		}
+	}
+	//创建蛇对象，并给蛇对象绑定方法让他能够显示，移动。
+	var Snake = function(){
+		//蛇节的宽高
+		this.x = 20;
+		this.y = 20;
+		//数组是用来记录每一个蛇节的相关属性的，之后让蛇显示的时候只要利用数组中的属性即可设置蛇节的样式
+		this.arr = [
+		{
+			top:3,//表示3个格子
+			left:1,//表示1个格子
+			color:"blue",//背景色
+			snake:null//是用来接收蛇节的dom元素的属性
+		},
+		{
+			top:3,//表示3个格子
+			left:2,//表示1个格子
+			color:"blue",//背景色
+			snake:null//是用来接收蛇节的dom元素的属性
+		},
+		{
+			top:3,//表示3个格子
+			left:3,//表示1个格子
+			color:"red",//背景色
+			snake:null//是用来接收蛇节的dom元素的属性
+		}
+		];
+	}
+	//编写确定方向的方法
+	Snake.prototype.setDirect = function(code){
+		//code用来接收键盘的键盘码，从而确定用户按下的键是哪一个
+		if(code==38){
+			this.direct = "top"
+		}
+		else if(code==40){
+			this.direct = "bottom"
+		}
+		else if(code==37){
+			this.direct = "left"
+		}
+		else if(code==39){
+			this.direct = "right"
+		}
+	}
+	//编写移动方法
+	Snake.prototype.snakeMove = function(){
+		//让蛇身部分的蛇节每次移动都移动到下一个蛇节的位置，
+		for(var i = 1;i<this.arr.length;i++){
+			//更改蛇节的定位值
+			this.arr[i-1].left = this.arr[i].left;
+			this.arr[i-1].top = this.arr[i].top;
+		}
+		//单独定位蛇头，依据用户按下的键来定位
+		var head = this.arr[this.arr.length-1];
+		if(this.direct=="top"){
+			//如果向上走，就让top属性自减
+			head.top--;
+		}
+		else if(this.direct=="bottom"){
+			head.top++;
+		}
+		else if(this.direct=="left"){
+			head.left--;
+		}
+		else if(this.direct=="right"){
+			head.left++;
+		}
+		else{
+			return//结束当前函数的执行
+		}
+		//判断：蛇头的定位值是否碰到边界
+		if(head.top<0||head.top>19||head.left<0||head.left>39){
+			alert("游戏结束，死于碰撞");
+			//刷新页面
+			location.reload();
+		}
+		//判断蛇是否吃到东西，如果吃到了，就重新定位食物，并且让蛇增长一节
+		//head.top 和 head.left是蛇头的定位
+		//food.y 和 food.x是食物的定位
+		if(head.top*20==food.y&&head.left*20==food.x){
+			console.log("haha")
+			//1.增长蛇
+			var obj = {
+				top:this.arr[0].top,
+				left:this.arr[0].left,
+				color:this.arr[0].color,
+				snake:null
+			}
+			this.arr.unshift(obj);
+			//2.让食物重新定位
+			food.show();
+		}
+
+		//每次重新设置完蛇节的定位之后，在重新让蛇显示一次
+		this.show();
+	}
+	//编写show方法
+	Snake.prototype.show = function(){
+		//判断，当前蛇节的dom元素是否存在如果存在，就改变定位，如果不存在，就动态创建并追加
+		//this 表示实例化的对象 实例化的对象中arr属性的数组中的对象里snake属性就是蛇节dom元素
+		for(var i = 0;i<this.arr.length;i++){
+			//如果当前地图里没有蛇，就显示
+			if(this.arr[i].snake==null){
+				this.arr[i].snake = document.createElement("div");
+				this.arr[i].snake.style.position = "absolute";
+				this.arr[i].snake.style.borderRadius = "10px"
+				this.arr[i].snake.style.left = this.arr[i].left*20+"px"
+				this.arr[i].snake.style.top = this.arr[i].top*20+"px"
+				this.arr[i].snake.style.backgroundColor = this.arr[i].color;
+				this.arr[i].snake.style.width = this.x+"px";
+				this.arr[i].snake.style.height = this.y+"px";
+				document.body.children[1].appendChild(this.arr[i].snake);
+			}
+			//如果已经有蛇了，蛇在移动，只需要给蛇定位即可。
+			else{
+				console.log("我在走")
+				this.arr[i].snake.style.left = this.arr[i].left*20+"px";
+				this.arr[i].snake.style.top = this.arr[i].top*20+"px";
+			}
+		}
+	}
+	var snake = new Snake()
+	snake.show();
+	window.onkeyup = function(e){
+		var code = e.keyCode;
+		snake.setDirect(code);
+	}
+	setInterval(function(){
+		snake.snakeMove()
+	},50)
+
+	var food = new Food();
+
+
+
+</script>
+</html>                                 

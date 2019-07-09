@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>打字游戏练习</title>
+	<style type="text/css">
+		*{
+			margin:0;
+			padding: 0;
+		}
+		body{
+			background: url(img/2.jpg) center center;
+			background-size: cover;
+		}
+		html,div{
+			margin:0 auto;
+			text-align: center;
+		}
+		.container{
+			width: 400px;
+			height: 500px;
+			background: rgba(0,0,0,0.5);
+			position: relative;
+		}
+		.btn>button{
+			width: 150px;
+			height: 50px;
+			margin-top: 30px;
+			font-size: 25px;
+		}
+	</style>
+</head>
+<body>
+	<h1>打字游戏</h1>
+	<span>得分:</span>
+	<span class="score">0</span>
+	<div class="container">
+		
+	</div>
+	<div class="btn">
+		<button>开始游戏</button>
+	</div>
+</body>
+<script type="text/javascript">
+	var getRan = function(){
+		var ranLetter =String.fromCharCode(Math.ceil(Math.random()*25+97));
+		var step = Math.random()*8+1;
+		var obj = {
+			text:ranLetter,
+			left:Math.random()*370,
+			top:0,
+			step:step
+		};
+		return obj;
+	}
+
+	var game = function(n,nScore){
+		var container = document.querySelector(".container");
+		var df = document.querySelector(".score")
+		var letterArr = [];
+		var run = function(){
+			container.innerHTML ="";
+			if (Math.random()>0.9) {
+				var obj = getRan();
+				letterArr.push(obj);
+			}
+			for (var j = 0; j < letterArr.length; j++) {
+				letterArr[j].top+=letterArr[j].step;
+				if (letterArr[j].top>=500) {
+					alert("Game Over!");
+				}
+			}
+			for (var i = 0; i < letterArr.length; i++) {
+				var letter = document.createElement("span");
+				letter.innerText = letterArr[i].text;
+				letter.style.width = "30px";
+				letter.style.height = "30px";
+				letter.style.position = "absolute";
+				letter.style.top = letterArr[i].top+"px";
+				letter.style.left = letterArr[i].left+"px";
+				letter.style.borderRadius = "15px";
+				letter.style.border = "1px solid white";
+				var c = Math.ceil(Math.random()*255);
+				letter.style.backgroundColor = "rgba("+c+","+c+","+c+","+0.4+")";
+				container.appendChild(letter);
+			}
+		}
+		setInterval(run,100);
+		document.documentElement.onkeyup = function(e){
+			for (var i = 0; i < letterArr.length; i++) {
+				if(e.key == letterArr[i].text){
+					letterArr.splice(i,1);
+				}
+			}
+		}
+	}
+	game();
+</script>
+</html>

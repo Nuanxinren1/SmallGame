@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>打字游戏</title>
+	<style type="text/css">
+		*{
+			margin: 0;
+			padding: 0;
+			}
+		body{
+			background: url(img/2.jpg) center center;
+			background-size: cover;
+		}
+		h1,div{
+				margin: 0 auto;
+				text-align: center;
+			}
+		.container{
+			width: 400px;
+			height: 500px;
+			background-color: rgba(0,0,0,0.3);
+			position: relative;
+		}
+		.btn>button{
+			width: 200px;
+			height: 60px;
+			margin-top: 30px;
+			font-size: 30px;
+		}
+	</style>
+</head>
+<body>
+		<!-- 标题 -->
+	<h1>打字游戏</h1>
+		<!-- 积分器 -->
+	<div class="df">
+		<span>得分：</span>
+		<span class="score">0</span>
+	</div>
+		<!-- 游戏主要显示部分 -->
+		<div class="container">
+		</div>
+		<!-- 按钮部分 -->
+		<div class="btn">
+			<button>开始游戏</button>
+		</div>
+</body>
+<script type="text/javascript">
+	//1.设置关卡及关卡难度
+	var gameGuans = [
+		{speed:100},
+		{speed:60},
+		{speed:20}
+	];
+	//2.当用户点击开始游戏按钮的时候,要有字母下落。
+	/*2.1 动态创建随机字母,使用fromCharCode方法将随机数
+			转换为对应字母*/
+var getRan = function(){
+			//随机数的范围是 97-122
+		var ranLetter = String.fromCharCode(Math.ceil(Math.random()*25+97));
+		//步长各不相同 在1~9之间取随机数设置步长
+		var step = Math.random()*8+1;
+			//使用工厂模式创建对象
+		var obj = {
+			text:ranLetter,
+			//字母对象的左定位是随机的(范围 0~大盒的宽度-字母对象宽),上定位是0
+			left:Math.random()*370,//字母对象宽设为30px
+			top:0,
+			//步长各不相同 在1~9之间取随机数设置步长
+			step: step
+		};
+		return obj;
+}
+		//2.2 创建新的函数来操作字符对象,让他们落下
+		//游戏要分关卡 各个关卡的难度不同,并且通关的分数也不同
+		//这里我们传入两个参数,n表示当前关卡数,nScore表示当前关卡的通关分数
+var game = function(n,nScore){
+		//2.2.1 获取一些需要用到的dom元素
+		var container = document.querySelector(".container");
+		var df = document.querySelector(".score");
+		//创建一个空数组,用来保存字符对象的配置对象。getRan函数是用来创建字符对象的配置对象的,这些配置对象会存储在这个数组中
+		var letterArr = [];
+		//创建一个函数来动态生成字符对象,并让其下落
+		var run = function(){
+			container.innerHTML = "";
+			if (Math.random()>0.9) {
+				//创建字符的配置对象
+				var obj = getRan();
+				letterArr.push(obj);
+									}
+
+			//先循环数组,查看数组中的配置对象的top属性,如果已经大于等于500px,就弹窗提示用户游戏失败
+			for (var j = 0; j < letterArr.length; j++) {
+				//1.先让每一个配置对象的top值都更新
+				letterArr[j].top+=letterArr[j].step;
+				//2.当top值更新之后要判断一下,如果top值已经大于等于盒子的高度,就意味着字符已经出框了,就游戏失败
+				if (letterArr[j].top>=500) {
+					alert("游戏结束,继续再战");
+					clearInterval(game.timer);
+					return false;
+											}
+														}
+			//我们现在已经将配置配置对象放入数组中,数组中有几个配置对象,我们就创建几个字符对象
+			for (var i = 0; i < letterArr.length; i++) {
+				var letter = document.createElement("span");
+				letter.innerText = letterArr[i].text;
+				//设置letter的宽高
+				letter.style.width = "30px";
+				letter.style.height = "30px";
+				//设置定位
+				letter.style.position = "absolute";
+				letter.style.top = letterArr[i].top+"px";
+				letter.style.left = letterArr[i].left+"px";
+				//设置字母的样式
+				letter.style.borderRadius = "15px";
+				letter.style.border = "1px solid white";
+				var r = Math.ceil(Math.random()*255);
+				var g = Math.ceil(Math.random()*255);
+				var b = Math.ceil(Math.random()*255);
+				letter.style.backgroundColor = "rgba("+r+","+g+","+b+","+0.4+")";
+				console.log(letter);
+				container.appendChild(letter);
+														}
+		}//run函数的结束
+		game.timer = setInterval(run,gameGuans[n].speed);
+		//设置计分变量
+		var sort = 0;
+		//让用户可以按下对应键盘让对应字符消失掉
+		document.documentElement.onkeyup = function(e){
+			//确定用户按下的键是什么
+			for (var i = 0; i < letterArr.length; i++) {
+					//如果敲中就移除该字母
+				if (e.key == letterArr[i].text) {
+					//删掉配置对象,斩草除根
+					letterArr.splice(i,1);
+					//如果敲中字母,就让得分加一
+					sort++;
+					//渲染到页面中(得分的类名为score的span)
+					df.innerText = sort;
+					//判断三关都通过
+			if (sort == nScore&&gameGuans[n+1] == undefined) {
+				alert("恭喜三关通过");
+				clearInterval(game.timer);
+			}
+					/*是否已经通过打当前关卡,如果通关就进入下一关,
+					n表示当前关卡数 nScore表示当前关卡的通关分数*/
+			else if (sort == nScore) {
+						alert("恭喜您通过当前关卡,进入下一关");
+						/*调用game函数就可以让游戏进入下一关,
+							只是传入的参数要有所变化*/
+							df.innerText = 0;
+							clearInterval(game.timer);
+							game(n+1,nScore+10);
+					}
+												}
+														}
+													   }
+		
+}//最大的函数game结束
+	//获取开始按钮
+	var btn = document.querySelector(".btn>button");
+btn.onclick = function(){
+	game(0,10);
+}
+
+</script>
+</html>

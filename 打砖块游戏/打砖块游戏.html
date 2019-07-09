@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>打砖块</title>
+	<style type="text/css">
+	 * {
+	  margin: 0; 
+	  padding: 0; 
+	  cursor: auto;
+	  /*pointer none help*/
+	   }
+ 
+        a { 
+        	text-decoration: none; 
+        }
+ 
+        ul, li { 
+        	list-style: none; 
+        }
+ 
+        body { 
+        	font-size: 14px; 
+        	font-family: "微软雅黑";
+        	 /*background: url("images/bg.jpg") top/cover;*/
+        	  }
+ 		/*小球div的样式*/
+        #ball {
+         width: 15px;
+          height: 15px; 
+          background: #000; 
+          border-radius: 50%;
+          position: absolute;
+          top: 0; 
+          left: 0;
+          box-shadow: 0 0 9px 9px red;
+       }
+ 		/*挡板的样式*/
+        #ward { 
+        	width: 240px; 
+        	height: 30px;
+        	z-index: 999;
+        	background-color: #336688; 
+        	border-radius: 10px; 
+        	box-shadow: 0 0 4px #333333; 
+        	position: absolute; 
+        	left: 0; 
+        	}
+ 		/*积分盒子的样式*/
+        #score {
+         width: 100px;
+         height: 100px;
+         font-size: 40px;
+         position: absolute;
+         right: 40px; 
+         top: 40px; 
+         color: #ff2541; 
+         }
+ 		/*砖块区域*/
+        #wrap { 
+        	width: 90%;
+        	height: 500px;
+        	position: relative; 
+        	top: 100px;
+        	left: 0;
+        	right: 0;
+        	margin: auto; 
+        	}
+ 		/*砖块的样式*/
+        #wrap div { 
+        	width: 45px; 
+        	height: 15px; 
+        	border: 1px solid #ff645b; 
+        	position: absolute; 
+        	background: rgb(255, 99, 89); 
+        	box-shadow: 0 0 9px 1px rgb(255, 187, 136) inset; 
+        	top: 0; 
+        	left: 0; 
+        	transform-origin: top center; 
+        }
+        /*游戏结束盒子*/
+        #gameover { 
+        	position: absolute; 
+        	left: 0; 
+        	right: 0; 
+        	top: 0; 
+        	bottom: 0; 
+        	margin: auto; 
+        	width: 300px; 
+        	height: 200px; 
+        	box-shadow: 0 0 4px #222222; 
+        	background-color: #e1e1e1; 
+        	display: none;
+        }
+ 
+        #gameover p { 
+        	width: 100%; 
+        	height: 40px; 
+        	text-align: center; 
+        	font-size: 36px; 
+        	color: #336688; 
+        	margin-top: 50px; 
+        }
+ 
+        #gameover span { 
+        	width: 60%; 
+        	height: 40px; 
+        	display: block; 
+        	margin: 38px auto 0; 
+        	text-align: center; 
+        	font-size: 20px; 
+        	background: #336688; 
+        	color: #ffffff; 
+        	border-radius: 10px; 
+        	line-height: 40px; 
+        }
+    </style>
+
+</head>
+<body>
+	<!-- 砖块区域 用来存放所有创建出来的砖块-->
+	<div id="wrap"></div>
+	<!-- 小球盒子 -->
+	<div id="ball"></div>
+	<!-- 挡板盒子 -->
+	<div id="ward"></div>
+	<!-- 积分盒子 -->
+	<div id="score">0分</div>
+	<!-- 游戏结束盒子 -->
+	<div id="gameover">
+	<p>总分:</p>
+    <span>确定</span>
+	</div>
+</body>
+<script type="text/javascript">
+		//获取dom元素
+	var wrap = document.querySelector("#wrap");//砖块区域
+	var ball = document.getElementsByTagName('div')[1];//小球盒子
+	var ward = document.getElementById("ward");//挡板
+	var gameover = document.querySelector("#gameover");//游戏结束盒子
+	var score = document.getElementById("score");//积分盒子
+		//0.创建对象
+	var Play = function(wrap,ball,ward,score,gameover){
+		//在构造函数中将需要用到的所有的dom元素都绑定给当前构造函数
+		this.wrap = wrap;
+		this.ball = ball;
+		this.ward = ward;
+		this.score = score;
+		this.gameover = gameover;
+		//给小球绑定定位值
+		this.x = this.ball.offsetLeft;
+		this.y = this.ball.offsetTop;
+		//绑定一下初始化速度和分数
+		this.scores = 0;
+		//小球的移动速度
+		this.speed = 10;
+		//让构造函数的this调用方法
+		this.inite();//inite初始化的意思
+	}
+		//封装inite函数,初始化所有的功能
+		Play.prototype.inite = function(){
+			//this是构造函数中的this,即实例化对象
+			//1.创建砖块
+			this.createBrick();
+			//2.初始化挡板
+			this.createWard();
+			//3.创建小球
+			this.createBall();
+		}
+		//1.创建砖块
+	Play.prototype.createBrick = function(){
+		//共有8行12列砖块(双层for循环)
+		//循环行的for循环
+		for (var i = 0; i < 8; i++) {
+			//循环列的for循环
+                for (var j = 0; j < 12; j++) {
+				var brick = document.createElement("div");
+                //追加到砖块区域
+                this.wrap.appendChild(brick);
+				//给所有砖块定位 铺开即可
+				//计算每一个砖块的定位值
+				var left = 2*brick.offsetWidth;
+				brick.style.left = j*left+"px";
+
+				var top = 2*brick.offsetHeight;
+				brick.style.top  = i*top+"px";
+			}
+		}
+	}
+        //2.创建挡板
+        //createWard的this也是实例化的对象
+    Play.prototype.createWard = function(){
+        //给挡板设置初始样式
+        var war = document.documentElement.offsetWidth/2 - this.ward.offsetWidth/2;
+        var wae = document.documentElement.offsetHeight - 5;
+        ward.style.left = war+"px";
+        ward.style.top = wae + "px";
+            //第一种方式
+        // document.onmousemove = function(e){
+        //         //鼠标定位
+        //     var pageX = e.pageX || e.clientX+document.documentElement.scrollLeft;
+        //     var pageY = e.pageY || e.clientY+document.documentElement.scrollTop;
+        //     var wardX = pageX - ward.offsetWidth;
+        //     var wardY = pageY - ward.offsetHeight;
+        //  if (wardX<=0) {
+        //     wardX = 0;
+        //  }
+        //  if (wardX>=document.documentElement.offsetWidth - ward.offsetWidth) {
+        //     wardX = document.documentElement.offsetWidth - ward.offsetWidth;
+        //  }
+        //     ward.style.left = wardX+"px";
+        // }
+            //第二种方式
+            window.addEventListener("mousemove",wardMove.bind(this));//this指向实例化的对象
+    }
+    function wardMove(e){//变量声明预解析,推荐使用声明式声明函数
+        //e表示事件对象
+        //鼠标定位
+         var pageX = e.pageX || e.clientX+document.documentElement.scrollLeft;
+         //限制挡板的移动范围
+         if (pageX <= 0) {
+            pageX = 0;
+         }
+         if (pageX >= document.documentElement.offsetWidth-this.ward.offsetWidth) {
+            pageX =document.documentElement.offsetWidth-ward.offsetWidth;
+         }
+         //wardMove函数虽然是事件处理函数,但是我们先前已经使用bind将其this指向实例化的对象
+          this.ward.style.left = pageX+"px";
+        }
+        //3.创建小球
+    Play.prototype.createBall = function(){
+        //给小球设置定位来初始化
+        this.x = document.documentElement.offsetWidth/2 - this.ball.offsetWidth/2;
+        this.y = document.documentElement.offsetHeight - 30;;
+        this.ball.style.left = this.x+"px";
+        this.ball.style.top = this.y+"px";
+            //在小球的初始化函数中,应该给页面一个点击事件,当页面被点击的时候,就将小球发射出去
+            var that =this;//that值为createBall方法函数的this即实例化对象
+        window.onclick = function(){
+            //通过调用函数的形式实现具体功能
+            that.ballMove();
+        }
+    }
+    //小球移动方法
+    Play.prototype.ballMove = function(){
+        //通过定时器改变小球的定位即可
+        // this.x this.y this.speed
+        //1.将速度拆分成水平速度和垂直速度
+        this.xSpeed = this.speed;
+        this.ySpeed = -this.speed;
+        var that = this;
+        var auto = function(){
+        //在当前小球定位值的基础上加上横向速度和纵向速度
+        that.x = that.x + that.xSpeed;
+        that.y = that.y + that.ySpeed;
+        //在定位之前先做碰撞检测,否则挡不住小球
+        that.crush();
+        that.ball.style.left = that.x + 'px';
+        that.ball.style.top = that.y + 'px';
+        //这个动画方法一定要放到auto函数的内部,利用递归的原理来实现动画效果
+        requestAnimationFrame(auto);
+        };
+        auto();
+    }
+    //碰撞检测函数
+Play.prototype.crush = function(){
+    //碰撞浏览器窗口上左右三边会反弹,碰到下边直接失败
+    //this指向实例化的对象
+    //碰撞上边
+    if (this.y <= 0) {
+        this.y = 0;
+        //让小球反弹
+        this.ySpeed = -this.ySpeed;
+    }
+    //碰到左边
+    else if (this.x <= 0) {
+        this.x = 0;
+        this.xSpeed = -this.xSpeed;
+    }
+    //碰撞到右边
+    else if(this.x >= document.documentElement.offsetWidth - this.ball.offsetWidth){
+    this.x = document.documentElement.offsetWidth - this.ball.offsetWidth;
+    this.xSpeed = -this.xSpeed;
+    }
+    //碰撞到下边
+    else if(this.y >= window.innerHeight - this.ball.offsetHeight){
+        //小球从下面超出页面,就失败
+        this.over();
+    }
+    //碰撞挡板 小球的横向速度不变 纵向速度取反
+    //球top值 = 挡板top值 - 球的高度
+    //球的左边left值 = 挡板的left值 - 球宽度/2   最小值
+    //球的右边left值 = 挡板的left + 挡板的宽度 - 球宽度/2   最大值
+    //球的top值
+    var ballTop = this.ward.offsetTop - this.ball.offsetHeight;
+    //最小值 左边的left值
+    var ballLeftMin = this.ward.offsetLeft - this.ball.offsetWidth/2;
+    //最大值 右边的left值
+    var ballLeftMax = ballLeftMin + this.ward.offsetWidth; 
+    if (this.y >= ballTop && this.x <= ballLeftMax && this.x >= ballLeftMin) {
+            //如果判断成功,证明小球已经碰在挡板上
+            this.y = ballTop;
+            this.ySpeed = -this.ySpeed;
+    }
+    //砖块的碰撞检测
+    //上临界 = 装砖块区域的top值 + 砖的offsetTop - 小球的高度offsetHeight
+    //下临界 = 砖高 + 砖的offsetTop + 装砖块区域的top值
+    //左临界 = 装砖块区域的left值 + 砖的offsetLeft - 小球的宽度offsetWidth
+    //右临界 = 装砖块区域的left值 + 砖的offsetLeft + 砖的offsetWidth;
+    for (var i = 0; i < wrap.children.length; i++) {
+        //计算临界值
+        //1.上临界
+        var topL = wrap.offsetTop + wrap.children[i].offsetTop - this.ball.offsetHeight; 
+        //2.下临界
+        var bottomL = wrap.offsetTop + wrap.children[i].offsetTop + wrap.children[i].offsetHeight;
+        //3.左临界
+        var leftL = wrap.offsetLeft + wrap.children[i].offsetLeft - this.ball.offsetWidth;
+        //4.右临界
+        var rightL = wrap.offsetLeft + wrap.children[i].offsetLeft + wrap.children[i].offsetWidth;
+        //判断,如果小球的top处于上下临界值之间,left也处于左右临界值之间,就证明小球碰到砖块了
+        if (this.y>=topL&&this.y<=bottomL&&this.x>=leftL&&this.x<=rightL) {
+                //1.碰到的砖块消失
+                 this.wrap.removeChild(this.wrap.childNodes[i]);
+                //2.小球反弹
+                this.ySpeed = -this.ySpeed;
+                //3.计分
+                //this是实例化的对象,恩因此sumScore函数是由对象调用的
+                this.sumScore();
+                //4.判断游戏结束
+                if (this.wrap.children.length == 0) {
+                    //如果没有砖块,就让游戏结束
+                    this.over();
+                }
+        }
+    }
+	
+}
+    //游戏计分功能
+Play.prototype.sumScore = function(){
+    //将计分属性自加即可
+    this.scores++;
+    //将分数渲染进页面中
+    this.score.innerText = this.scores + "分";
+}
+    //游戏结束功能
+Play.prototype.over = function(){
+    //让游戏结束盒子显示
+    this.gameover.style.display = "block";
+    //显示用户总得分
+    this.gameover.children[0].innerText = "总分:" +this.scores + "分";
+    //解决失败后小球还在继续弹的问题,当游戏结束的时候,直接让小球和挡板隐藏
+    document.body.removeChild(this.ball);
+    this.ward.style.display = "none";
+    //让点击窗口小球移动的效果失效
+    window.onclick = null;
+    //给确定按钮添加点击事件
+    this.gameover.children[1].onclick = function(){
+        //让点击事件刷新页面
+        location.reload();
+    }
+}
+var p = new Play(wrap, ball, ward, score, gameover);
+</script>
+</html>

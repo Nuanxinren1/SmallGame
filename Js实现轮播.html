@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Js实现轮播</title>
+	 <style type="text/css">
+        * {
+            padding: 0;
+            margin: 0;
+            list-style: none;
+            border: 0;
+        }
+
+        .all {
+            width: 500px;
+            height: 200px;
+            padding: 7px;
+            border: 1px solid #000;
+            margin: 100px auto;
+            position: relative;
+        }
+
+        .screen {
+            width: 500px;
+            height: 200px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .screen li {
+            width: 500px;
+            height: 200px;
+            overflow: hidden;
+            float: left;
+        }
+
+        .screen ul {
+            position: absolute;
+            left: 0;
+            top: 0px;
+            width: 3000px;
+        }
+
+        .all ol {
+            position: absolute;
+            right: 10px;
+            bottom: 10px;
+            line-height: 20px;
+            text-align: center;
+        }
+
+        .all ol li {
+            float: left;
+            width: 20px;
+            height: 20px;
+            background: #fff;
+            border: 1px solid #ccc;
+            margin-left: 10px;
+            cursor: pointer;
+        }
+
+        .all ol li.current {
+            background: yellow;
+        }
+
+        #arr {
+            display: none;
+        }
+
+        #arr span {
+            width: 40px;
+            height: 40px;
+            position: absolute;
+            left: 5px;
+            top: 50%;
+            margin-top: -20px;
+            background: #000;
+            cursor: pointer;
+            line-height: 40px;
+            text-align: center;
+            font-weight: bold;
+            font-family: '黑体';
+            font-size: 30px;
+            color: #fff;
+            opacity: 0.3;
+            border: 1px solid #fff;
+        }
+
+        #arr #right {
+            right: 5px;
+            left: auto;
+        }
+    </style>
+
+</head>
+<body>
+	<div class="all" id='box'>
+    <div class="screen"> <!--就是窗口盒子-->
+        <ul>
+            <li><img src="images/1.jpg" width="500" height="200"/></li>
+            <li><img src="images/2.jpg" width="500" height="200"/></li>
+            <li><img src="images/3.jpg" width="500" height="200"/></li>
+            <li><img src="images/4.jpg" width="500" height="200"/></li>
+            <li><img src="images/5.jpg" width="500" height="200"/></li>
+        </ul>
+        <ol></ol><!--ol是序号标签-->
+    </div>
+    <div id="arr">
+    	<span id="left">&lt;</span>
+    	<span id="right">&gt;</span>
+    </div>
+</div>
+
+	<!-- 引入动画 -->
+<script type="text/javascript" src="animate (1).js"></script>
+</body>
+<script type="text/javascript">
+		//实现以下四个功能
+//1.实现序号轮播
+	//a.动态创建序号
+var ul = document.querySelector("ul");
+var ol = document.querySelector("ol");
+var olLis = ol.children;
+var ulLis = ul.children;
+var box = document.querySelector("#box");
+var arr = document.querySelector("#arr");
+var span = document.querySelectorAll("span");
+var spanL= document.querySelector("#left");
+var spanR= document.querySelector("#right");
+	//循环ul中的所有li,每有一个li就创建一个序号
+for (var i = 0; i < ulLis.length; i++) {
+	//序号存储在ol中,因此要将序号创建为li元素
+	var li = document.createElement("li");
+	li.innerText = i+1;
+	ol.appendChild(li);
+}
+	//b.序号轮播逻辑
+	//ul的offsetLeft值 = -下标*图宽(ulLis[0].offsetWidth)
+	for (var j = 0; j < olLis.length; j++) {
+			//由于事件里面不能直接使用j,因此存储下标
+		olLis[j].index = j;
+		olLis[j].onmouseover = function(){
+			//给pic做关联,让pic = this.Index
+			pic = this.index;
+			//让ul动画移动,需要计算终点值
+			var end = -this.index*ulLis[0].offsetWidth;
+			animate(ul,end);
+			//让鼠标悬停的序号背景颜色变为黄色
+			//干掉所有人,复活我自己
+			//for循环所有的序号,让他们都变白
+			for (var i = 0; i < olLis.length; i++) {
+				olLis[i].className = "";
+			}
+			this.className = "current";
+		}
+	}
+
+//2.实现箭头轮播
+		//a.鼠标移入箭头显示,鼠标移出箭头隐藏
+	box.onmouseenter = function(){
+		arr.style.display = "block";
+	}
+	box.onmouseleave = function(){
+		arr.style.display = "none";
+	}
+		//b.实现箭头轮播
+		//插入实现无缝滚动效果的假图片(克隆)
+		var firstImg = ulLis[0].cloneNode(true);
+		ul.appendChild(firstImg);
+		//定义一个计数变量,用来记录已经被推出窗口的图片个数
+		var pic = 0;
+		//用来记录当前序号的下标
+		var square = 0;
+		spanR.onclick = function(){
+		//判断 如果到假的第一张,就直接定位到真的第一张
+		if(pic >= ulLis.length-1 ){
+			ul.style.left = "0px";
+			pic = 0;
+		}
+		//每次点击右箭头,就会将一张图推出窗口
+		pic++;
+		square = pic;
+		//做动画,animate(dom元素,终点)-->animate(ul,end)
+		var end = -pic*ulLis[0].offsetWidth;
+		animate(ul,end);
+		//判断square如果等于ulLis.length-1,就没有这个下标的序号了
+        /*如果当前显示的已经是假的第一张(square == 5),
+            就让序号1亮起(把square重置为0)*/
+		if (square == ulLis.length-1) {
+			//直接将square重新赋值为0
+			square = 0;
+		}
+		//关联序号亮起 pic和序号下标值一样,
+		//因此让下标为pic的序号亮起即可
+		for (var i = 0; i < olLis.length; i++) {
+			olLis[i].className = "";
+		}
+		olLis[square].className = "current";
+	}
+
+//3.实现无缝滚动
+
+//4.实现自动轮播
+</script>
+</html>

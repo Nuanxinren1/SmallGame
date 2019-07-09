@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>下雪</title>
+	<style type="text/css">
+		*{
+			margin: 0;
+			padding: 0;
+		}
+		html{
+			width: 100%;
+			height: 100%;
+		}
+		body{
+			background: url(img/1.jpg) center center no-repeat;
+			background-size: cover;
+			overflow: hidden;
+		}
+	</style>
+</head>
+<body>
+	
+</body>
+<script type="text/javascript">
+	//所有的雪花都是动态创建的
+	//1.由于雪花的left是随机的,因此我们先设置一个求随机数的函数
+	//100~200的随机数 Math.random()*100+100(下限100,上限200)
+	//100~300的随机数 Math.random()*200+100(下限100,上限300)
+	//Math.random()*(上限-下限)+下限
+	var getRun = function(s,e){
+		//s是下限,e是上限
+		//注意:现在要求既可以取到下限也能取到上限
+		var num = Math.ceil(Math.random()*(e-s)+s);//s~e之间的随机数
+		return num;
+	}
+	//2.实现下雪效果
+	//2.1 封装一个构造函数,用来创建雪花对象
+	var SnowFlake = function(wid,hei,body){
+		/*在这个构造函数中要将页面的宽、高等属性绑定给对象,以便于
+			后续代码使用*/
+			this.width = wid;
+			this.height = hei;
+			this.body = body;
+			//让雪花对象调用创建雪花的方法,来创建出一个雪花img标签
+			this.createSnow();
+	}
+	//继承分两条线,构造函数和原型
+	SnowFlake.prototype.createSnow = function(){
+		//雪花对象就是dom对象
+		//createSnow的this指向SnowFlake的this(就是实例化的对象)
+		this.snow = document.createElement("img");
+		this.snow.src = "img/馅饼.jpg";
+		// this.snow.style.width = "50px";
+		// this.snow.style.height = "50px";
+		//计算雪花img的left值,随机范围是0 ~ 页面宽度-img雪花宽度
+		//页面宽度是this.width
+		//雪花宽度是this.snow.offsetWidth
+		var left = getRun(0,this.width-this.snow.offsetWidth);
+this.snow.style.cssText = "width:50px; height:50px; position:absolute;  top:-50px; left:"+left+"px;transition:all 3s;";
+		//将雪花img追加到页面(body)中
+		this.body.appendChild(this.snow);
+		//利用this让雪花落下
+		/*这里的this是createSnow函数的this,指向构造函数的this即实
+			例化的对象。由于对象调用fall,我们只要把fall方法写在原型即可*/
+		this.fall();
+	}
+	SnowFlake.prototype.fall = function(){
+		//fall方法中的this-->createSnow的this-->SnowFlake的this-->实例化的对象
+		//这里使用css3动画实现动画效果
+		//接收fall方法中的this
+		var that = this;
+		//这里的定时器是为了将操作css的代码变为异步代码而存在的
+		setTimeout(function(){
+			that.snow.style.top = that.height+"px";
+		},1000)	
+	}
+		//多次实例化雪花对象,让雪花自动落下即可
+		setInterval(function(){
+			var snow = new SnowFlake(document.documentElement.offsetWidth,document.documentElement.offsetHeight,document.body);
+		},100)
+	
+</script>
+</html>

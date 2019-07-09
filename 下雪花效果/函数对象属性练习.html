@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>函数对象属性</title>
+</head>
+<body>
+	
+</body>
+<script type="text/javascript">
+	var a = 0;
+	var fn = function(){
+		if (a>5) {
+			return false
+		}
+		a++;
+		console.log(arguments);
+		console.log(fn.caller);//打印fn1
+		arguments.callee();//fn1
+		
+	}
+	var fn1 = function(){
+		fn();
+	}
+	fn1();
+</script>
+</html>

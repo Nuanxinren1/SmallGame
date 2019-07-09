@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>鼠标跟随</title>
+	<style type="text/css">
+		*{
+			margin: 0;
+			padding: 0;
+		}
+		img{
+			position: absolute;
+			left: 0;
+			top: 0;
+		}
+	</style>
+</head>
+<body>
+	<img src="img/超人.gif" alt="" width="50" height="50" id="">
+
+		<!-- 引包 -->
+<script type="text/javascript" src="animate.js"></script>
+</body>
+<script type="text/javascript">
+	/*想让图标跟随鼠标,只要获取到鼠标在页面上的位置,作为图标动画的
+		终点值即可*/
+	//首先获取dom元素
+	var img = document.querySelector("img");
+//由于鼠标要在整个页面内移动,因此鼠标移动事件绑定给页面(document)
+	document.onmousemove = function(e){
+			console.log(e);
+		//获取鼠标相对于页面的位置
+var pageX = e.pageX||e.clientX+document.documentElement.scrollLeft;
+var pageY = e.pageY||e.clientY+document.documentElement.scrollTop;
+	//让图片的中心部分定位到鼠标位置
+	var targetX = pageX - img.offsetWidth/2;
+	var targetY = pageY - img.offsetHeight/2;
+	//封装的动画,可以直接使用animate
+	//animate(dom元素,终点值)
+animate(img,{
+	left:targetX,
+	top:targetY
+});
+	}
+</script>
+</html>

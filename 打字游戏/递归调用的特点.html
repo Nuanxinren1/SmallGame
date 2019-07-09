@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>递归</title>
+</head>
+<body>
+	
+</body>
+<script type="text/javascript">
+	var c = 0;
+	var fn = function(){
+		console.log("a");
+		c++;
+		if (c>=10) {
+			return false;
+		}
+		fn();
+		console.log("b");
+	}
+	fn();
+</script>
+</html>
